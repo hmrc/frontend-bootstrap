@@ -21,17 +21,17 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatest.{Matchers, OptionValues, WordSpecLike}
 import play.api.http.HeaderNames
-import play.api.mvc.{Cookie, RequestHeader, Result, Results, Cookies}
+import play.api.mvc.{Cookie, Cookies, RequestHeader, Result, Results}
 import play.api.test.{FakeApplication, FakeRequest, WithApplication}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.filters.frontend.{DeviceIdCookie, DeviceId}
+import uk.gov.hmrc.play.filters.frontend.{DeviceId, DeviceIdCookie}
 import org.apache.commons.codec.binary.Base64
 
 import scala.concurrent.Future
 
-class DeviceIdCookieFilterSpec extends WordSpecLike with Matchers with MockitoSugar with ScalaFutures {
+class DeviceIdCookieFilterSpec extends WordSpecLike with Matchers with MockitoSugar with ScalaFutures with OptionValues {
 
   final val theSecret = "some_secret"
   final val thePreviousSecret = "some previous secret with spaces since spaces cause an issue unless encoded!!!"
@@ -63,6 +63,16 @@ class DeviceIdCookieFilterSpec extends WordSpecLike with Matchers with MockitoSu
     }
   }
 
+  def mdtpdiSetCookie(result: Result): Cookie = {
+    val cookie = for {
+      header <- result.header.headers.get("Set-Cookie")
+      setCookies = Cookies.decodeSetCookieHeader(header)
+      deviceCookie <- setCookies.find(_.name == DeviceId.MdtpDeviceId)
+    }
+    yield deviceCookie
+    cookie.value
+  }
+
   "DeviceIdFilter" should {
 
     "create the deviceId when no cookie exists" in new WithApplication(FakeApplication(additionalConfiguration = appConfig)) with Setup {
@@ -72,8 +82,9 @@ class DeviceIdCookieFilterSpec extends WordSpecLike with Matchers with MockitoSu
 
       val deviceIdRequestCookie: Cookie = requestPassedToAction.cookies(DeviceId.MdtpDeviceId)
 
-      val responseDeviceIdCookie = Cookies.decodeSetCookieHeader(response.header.headers(HeaderNames.SET_COOKIE)).head.value
-      responseDeviceIdCookie shouldBe deviceIdRequestCookie.value
+      val responseDeviceIdCookie = mdtpdiSetCookie(response)
+      responseDeviceIdCookie.value shouldBe deviceIdRequestCookie.value
+      responseDeviceIdCookie.secure shouldBe true
     }
 
     "create the deviceId when no cookie exists and previous keys are empty" in new WithApplication(FakeApplication(additionalConfiguration = appConfigNoPreviousKey)) with Setup {
@@ -83,12 +94,13 @@ class DeviceIdCookieFilterSpec extends WordSpecLike with Matchers with MockitoSu
 
       val deviceIdRequestCookie: Cookie = requestPassedToAction.cookies(DeviceId.MdtpDeviceId)
 
-      val responseDeviceIdCookie = Cookies.decodeSetCookieHeader(response.header.headers(HeaderNames.SET_COOKIE)).head.value
-      responseDeviceIdCookie shouldBe deviceIdRequestCookie.value
+      val responseDeviceIdCookie = mdtpdiSetCookie(response)
+      responseDeviceIdCookie.value shouldBe deviceIdRequestCookie.value
+      responseDeviceIdCookie.secure shouldBe true
     }
 
 
-    "do nothing when a valid cookie exists" in new WithApplication(FakeApplication(additionalConfiguration = appConfig)) with Setup {
+    "update the cookie even if it already exists to ensure it is secure" in new WithApplication(FakeApplication(additionalConfiguration = appConfig)) with Setup {
 
       val deviceId = createDeviceId.buildNewDeviceIdCookie()
       val incomingRequest = FakeRequest().withCookies(deviceId)
@@ -96,9 +108,11 @@ class DeviceIdCookieFilterSpec extends WordSpecLike with Matchers with MockitoSu
       val response = DeviceIdCookieFilter("someapp",auditConnector)(action)(incomingRequest).futureValue
 
       val deviceIdRequestCookie: Cookie = requestPassedToAction.cookies(DeviceId.MdtpDeviceId)
-
       deviceIdRequestCookie.value shouldBe deviceId.value
-      response.header.headers shouldBe Map.empty
+
+      val responseDeviceIdCookie = mdtpdiSetCookie(response)
+      responseDeviceIdCookie.value shouldBe deviceIdRequestCookie.value
+      responseDeviceIdCookie.secure shouldBe true
     }
 
     "successfully decode a deviceId generated from a previous secret" in new WithApplication(FakeApplication(additionalConfiguration = appConfig)) with Setup {
@@ -113,9 +127,11 @@ class DeviceIdCookieFilterSpec extends WordSpecLike with Matchers with MockitoSu
       val deviceIdRequestCookie: Cookie = requestPassedToAction.cookies(DeviceId.MdtpDeviceId)
 
       deviceIdRequestCookie.value shouldBe cookieDeviceIdPrevious.value
-      response.header.headers shouldBe Map.empty
-    }
 
+      val responseDeviceIdCookie = mdtpdiSetCookie(response)
+      responseDeviceIdCookie.value shouldBe deviceIdRequestCookie.value
+      responseDeviceIdCookie.secure shouldBe true
+    }
   }
 
 }
