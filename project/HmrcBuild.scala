@@ -1,4 +1,4 @@
-import sbt.Keys._
+import sbt.Keys.{version, _}
 import sbt._
 
 object HmrcBuild extends Build {
@@ -22,9 +22,10 @@ object HmrcBuild extends Build {
         Resolver.bintrayRepo("hmrc", "release-candidates"),
         Resolver.typesafeRepo("releases"),
         Resolver.jcenterRepo
-      )
-  )
-    .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
+      ),
+      version := "100.0-SNAPSHOT"
+      
+  ).disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
 
 }
 
@@ -36,7 +37,13 @@ object Dependencies {
   val compile = Seq(
     filters,
     "uk.gov.hmrc" %% "crypto" % "4.4.0",
-    "uk.gov.hmrc" %% "play-filters" % "5.18.0",
+    "uk.gov.hmrc" %% "play-filters" % "100.0-SNAPSHOT",
+    "uk.gov.hmrc" %% "play-auditing" % "100.0-SNAPSHOT",
+    
+//    "uk.gov.hmrc" %% "http-verbs" % "38.0.0-SNAPSHOT",
+//    "uk.gov.hmrc" %% "play-http-verbs" % "19.0-SNAPSHOT",
+//    "uk.gov.hmrc" %% "http-verbs" % "38.0-SNAPSHOT",
+    "uk.gov.hmrc" %% "http-verbs-play-25" % "100.0-SNAPSHOT",
     "uk.gov.hmrc" %% "play-graphite" % "3.2.0",
     "com.typesafe.play" %% "play" % PlayVersion.current,
     "de.threedimensions" %% "metrics-play" % "2.5.13",

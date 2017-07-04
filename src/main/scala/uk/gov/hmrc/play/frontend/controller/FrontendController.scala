@@ -18,14 +18,17 @@ package uk.gov.hmrc.play.frontend.controller
 
 import play.api.http.MimeTypes
 import play.api.mvc._
-import scala.concurrent._
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.{HeaderCarrier, LoggingDetails}
+import uk.gov.hmrc.play.audit.HeaderCarrierConverter
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext
-import uk.gov.hmrc.play.http.logging.LoggingDetails
+
+
+
+import scala.concurrent._
 
 trait FrontendController extends Controller with Utf8MimeTypes {
 
-  implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrier.fromHeadersAndSession(request.headers, Some(request.session))
+  implicit def hc(implicit request: Request[_]): HeaderCarrier = HeaderCarrierConverter.fromHeadersAndSession(request.headers, Some(request.session))
 
   implicit def mdcExecutionContext(implicit loggingDetails: LoggingDetails): ExecutionContext = MdcLoggingExecutionContext.fromLoggingDetails
 

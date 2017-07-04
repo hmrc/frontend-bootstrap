@@ -23,9 +23,9 @@ import play.api._
 import play.api.mvc._
 import play.filters.csrf.CSRFFilter
 import play.filters.headers.SecurityHeadersFilter
-import uk.gov.hmrc.play.audit.filters.FrontendAuditFilter
+import uk.gov.hmrc.play.audit.filters.{DeviceIdFilter, FrontendAuditFilter}
 import uk.gov.hmrc.play.audit.http.config.ErrorAuditingSettings
-import uk.gov.hmrc.play.filters.frontend.{CSRFExceptionsFilter, DeviceIdFilter, HeadersFilter, SessionTimeoutFilter}
+import uk.gov.hmrc.play.filters.frontend.{CSRFExceptionsFilter, HeadersFilter, SessionTimeoutFilter}
 import uk.gov.hmrc.play.filters.{CacheControlFilter, MicroserviceFilterSupport, RecoveryFilter}
 import uk.gov.hmrc.play.frontend.bootstrap.Routing.RemovingOfTrailingSlashes
 import uk.gov.hmrc.play.frontend.filters.{DeviceIdCookieFilter, SecurityHeadersFilterFactory, SessionCookieCryptoFilter}

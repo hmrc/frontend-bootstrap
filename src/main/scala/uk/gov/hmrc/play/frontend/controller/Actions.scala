@@ -19,7 +19,8 @@ package uk.gov.hmrc.play.frontend.controller
 import org.slf4j.MDC
 import play.api.Logger
 import play.api.mvc._
-import uk.gov.hmrc.play.http.{HeaderNames, SessionKeys}
+import uk.gov.hmrc.http.{HeaderNames, SessionKeys}
+
 import scala.concurrent.Future
 
 object UnauthorisedAction {
