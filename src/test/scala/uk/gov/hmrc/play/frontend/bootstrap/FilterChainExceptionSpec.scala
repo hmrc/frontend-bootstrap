@@ -29,7 +29,7 @@ import play.api.routing.sird._
 import play.api.test.WsTestClient
 import play.filters.headers.SecurityHeadersFilter
 import uk.gov.hmrc.play.filters.RecoveryFilter
-import uk.gov.hmrc.play.http.NotFoundException
+import uk.gov.hmrc.http.NotFoundException
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration

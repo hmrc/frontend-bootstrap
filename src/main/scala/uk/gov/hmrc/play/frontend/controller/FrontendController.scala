@@ -18,11 +18,10 @@ package uk.gov.hmrc.play.frontend.controller
 
 import play.api.http.MimeTypes
 import play.api.mvc._
-import uk.gov.hmrc.http.{HeaderCarrier, LoggingDetails}
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.logging.LoggingDetails
 import uk.gov.hmrc.play.audit.HeaderCarrierConverter
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext
-
-
 
 import scala.concurrent._
 
