@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.play.filters.frontend
+package uk.gov.hmrc.play.frontend.filters
 
-import org.scalactic.Equivalence
-import play.api.mvc.RequestHeader
+import play.api.mvc.Results._
+import play.api.mvc._
 
-object RequestHeaderEquivalence extends Equivalence[RequestHeader] {
+import scala.concurrent.ExecutionContext
 
-  def areEquivalent(h1: RequestHeader, h2: RequestHeader): Boolean = {
-    h1.id == h2.id &&
-    h1.tags == h2.tags &&
-    h1.uri == h2.uri &&
-    h1.path == h2.path &&
-    h1.method == h2.method &&
-    h1.version == h2.version &&
-    h1.queryString == h2.queryString &&
-    h1.headers.toMap == h2.headers.toMap &&
-    h1.remoteAddress == h2.remoteAddress
+trait FilterFlowMock {
+
+  def actionNotFoundMessage = "404 Not Found"
+
+  def nextAction(implicit ec: ExecutionContext): Action[AnyContent] = Action(NotFound(actionNotFoundMessage))
+
+  def exceptionThrowingAction(implicit ec: ExecutionContext) = Action.async { request =>
+    throw new RuntimeException("Something went wrong")
   }
 }

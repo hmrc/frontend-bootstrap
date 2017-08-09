@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.play.filters.frontend
+package uk.gov.hmrc.play.frontend.filters
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
 import org.mockito.Matchers._
-import org.mockito.Mockito._
+import org.mockito.Mockito.{times, _}
 import org.mockito.{ArgumentCaptor, Mockito}
 import org.scalactic.TypeCheckedTripleEquals
 import org.scalatest._

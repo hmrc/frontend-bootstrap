@@ -28,8 +28,8 @@ import play.api.routing.Router
 import play.api.routing.sird._
 import play.api.test.WsTestClient
 import play.filters.headers.SecurityHeadersFilter
-import uk.gov.hmrc.play.filters.RecoveryFilter
 import uk.gov.hmrc.http.NotFoundException
+import uk.gov.hmrc.play.frontend.filters.RecoveryFilter
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration

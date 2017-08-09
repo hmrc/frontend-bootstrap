@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.play.filters.frontend
+package uk.gov.hmrc.play.frontend.filters
 
 import org.joda.time.{DateTime, DateTimeZone, Duration}
 import play.api.http.HeaderNames.COOKIE
 import play.api.mvc._
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.http.SessionKeys._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.SessionKeys._
 
 /**
   * Filter that manipulates session data if 'ts' session field is older than configured timeout.

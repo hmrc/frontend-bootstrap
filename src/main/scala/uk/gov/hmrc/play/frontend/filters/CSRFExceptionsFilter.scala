@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.play.filters.frontend
+package uk.gov.hmrc.play.frontend.filters
 
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.http.HttpVerbs.POST
 import play.api.mvc.{Result, _}
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 
 import scala.concurrent.Future
 

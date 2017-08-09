@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.play.filters.frontend
+package uk.gov.hmrc.play.frontend.filters
 
 import org.joda.time.{DateTime, Duration}
 import org.scalatest.concurrent.ScalaFutures
@@ -23,11 +23,9 @@ import org.scalatest.{Matchers, WordSpecLike}
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.mvc.{RequestHeader, _}
 import play.api.test.{FakeHeaders, FakeRequest}
-import uk.gov.hmrc.play.filters.frontend.SessionTimeoutFilter.whitelistedSessionKeys
 import uk.gov.hmrc.http.SessionKeys._
-
+import SessionTimeoutFilter._
 import scala.concurrent.Future
-
 
 class SessionTimeoutFilterSpec extends WordSpecLike with Matchers with ScalaFutures with OneAppPerSuite {
 

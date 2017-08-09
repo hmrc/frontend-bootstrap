@@ -16,18 +16,15 @@
 
 package uk.gov.hmrc.play.frontend.filters
 
-import uk.gov.hmrc.crypto.{ApplicationCrypto, Crypted, PlainText}
+import akka.stream.Materializer
+import play.api.Play
+import play.api.Play.current
+import play.mvc.Http.HeaderNames
 
-object SessionCookieCryptoFilter extends CookieCryptoFilter with MicroserviceFilterSupport {
+object CommonHeaders {
+  val NoCacheHeader = HeaderNames.CACHE_CONTROL -> "no-cache,no-store,max-age=0"
+}
 
-  // Lazy because the filter is instantiated before the config is loaded
-  private lazy val crypto = ApplicationCrypto.SessionCookieCrypto
-
-  override protected val encrypter = encrypt _
-  override protected val decrypter = decrypt _
-
-  def encrypt(plainCookie: String): String = crypto.encrypt(PlainText(plainCookie)).value
-
-  def decrypt(encryptedCookie: String): String = crypto.decrypt(Crypted(encryptedCookie)).value
-
+trait MicroserviceFilterSupport {
+  implicit def mat: Materializer = Play.materializer
 }

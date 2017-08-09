@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.play.filters
+package uk.gov.hmrc.play.frontend.filters
 
 import play.api.mvc.{Filter, RequestHeader, Result}
 import play.api.{Logger, Play}
-import play.mvc.Http.{HeaderNames, Status}
+import play.mvc.Http.Status
 
 import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global

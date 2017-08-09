@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.play.filters.frontend
+package uk.gov.hmrc.play.frontend.filters
 
 import akka.actor.ActorSystem
 import akka.stream.{ActorMaterializer, Materializer}
@@ -29,7 +29,6 @@ import org.scalatest.mock.MockitoSugar
 import play.api.Logger
 import play.api.mvc._
 import play.api.test.FakeRequest
-import uk.gov.hmrc.play.filters.LogCapturing
 
 import scala.concurrent.Future
 

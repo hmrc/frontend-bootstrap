@@ -19,9 +19,7 @@ package uk.gov.hmrc.play.frontend.filters
 import org.apache.commons.codec.binary.Base64
 import play.api.Play.current
 import play.api.{Logger, Play}
-import uk.gov.hmrc.play.audit.filters.DeviceIdFilter
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 
 class DeviceIdCookieFilter(val appName: String, val auditConnector: AuditConnector) extends DeviceIdFilter
   with MicroserviceFilterSupport {

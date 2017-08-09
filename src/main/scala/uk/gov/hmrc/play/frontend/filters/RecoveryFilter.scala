@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.play.filters
+package uk.gov.hmrc.play.frontend.filters
 
 import akka.util.ByteString
 import play.api.http.Status._

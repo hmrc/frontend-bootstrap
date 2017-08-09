@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.play.filters
+package uk.gov.hmrc.play.frontend.filters
 
-import play.api.mvc.{Filter, RequestHeader, Result}
+import org.scalactic.Equivalence
+import play.api.mvc.RequestHeader
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+object RequestHeaderEquivalence extends Equivalence[RequestHeader] {
 
-/**
-  * This filter adds Cache-Control: no-cache,no-store,max-age=0 headers
-  * to all responses overriding any existing Cache-Control headers.
-  */
-
-object NoCacheFilter extends Filter with MicroserviceFilterSupport {
-
-  def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-    next(rh).map(_.withHeaders(CommonHeaders.NoCacheHeader))
+  def areEquivalent(h1: RequestHeader, h2: RequestHeader): Boolean = {
+    h1.id == h2.id &&
+    h1.tags == h2.tags &&
+    h1.uri == h2.uri &&
+    h1.path == h2.path &&
+    h1.method == h2.method &&
+    h1.version == h2.version &&
+    h1.queryString == h2.queryString &&
+    h1.headers.toMap == h2.headers.toMap &&
+    h1.remoteAddress == h2.remoteAddress
   }
 }

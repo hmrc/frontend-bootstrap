@@ -26,7 +26,6 @@ import org.scalatest.{Matchers, WordSpecLike}
 import play.api.http.HeaderNames
 import play.api.mvc._
 import play.api.test.{FakeApplication, FakeRequest, WithApplication}
-import uk.gov.hmrc.play.audit.filters.{DeviceId, DeviceIdCookie}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.Future
