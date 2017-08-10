@@ -23,7 +23,7 @@ object HmrcBuild extends Build {
         Resolver.typesafeRepo("releases"),
         Resolver.jcenterRepo
       ),
-      version := "100.0-SNAPSHOT"
+      version := "100.1-SNAPSHOT"
       
   ).disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
 
@@ -39,11 +39,16 @@ object Dependencies {
     "uk.gov.hmrc" %% "crypto" % "4.4.0",
     "uk.gov.hmrc" %% "play-auditing" % "100.0-SNAPSHOT",
     "uk.gov.hmrc" %% "http-verbs" % "7.0.0",
-    "uk.gov.hmrc" %% "http-verbs-play-25" % "100.0-SNAPSHOT",
+    "uk.gov.hmrc" %% "http-verbs-play-25" % "0.6.0",
     "uk.gov.hmrc" %% "play-graphite" % "3.2.0",
+    "ch.qos.logback" % "logback-core" % "1.1.7",
+    "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",
+    "uk.gov.hmrc" %% "govuk-template" % "5.3.0",
+    "uk.gov.hmrc" %% "play-config" % "4.3.0",
+    "uk.gov.hmrc" %% "play-health" % "2.1.0",
+    "uk.gov.hmrc" %% "play-ui" % "7.4.0",
     "com.typesafe.play" %% "play" % PlayVersion.current,
-    "de.threedimensions" %% "metrics-play" % "2.5.13",
-    "ch.qos.logback" % "logback-core" % "1.1.7"
+    "de.threedimensions" %% "metrics-play" % "2.5.13"
   )
 
   val test = Seq(
