@@ -66,16 +66,16 @@ trait FrontendAuditFilter extends EssentialFilter with HttpAuditEvent {
         maybeResult match {
           case Success(result) =>
             val responseHeader = result.header
+            val detail = Map(
+              ResponseMessage -> filterResponseBody(result, responseHeader, new String(responseBody)),
+              StatusCode -> responseHeader.status.toString
+            ) ++ buildRequestDetails(requestHeader, requestBody) ++ buildResponseDetails(responseHeader)
             auditConnector.sendEvent(
-              dataEvent(EventTypes.RequestReceived, requestHeader.uri, requestHeader)
-                .withDetail(ResponseMessage -> filterResponseBody(result, responseHeader, new String(responseBody)), StatusCode -> responseHeader.status.toString)
-                .withDetail(buildRequestDetails(requestHeader, requestBody).toSeq: _*)
-                .withDetail(buildResponseDetails(responseHeader).toSeq: _*))
+              dataEvent(EventTypes.RequestReceived, requestHeader.uri, requestHeader, detail))
           case Failure(f) =>
             auditConnector.sendEvent(
-              dataEvent(EventTypes.RequestReceived, requestHeader.uri, requestHeader)
-                .withDetail(FailedRequestMessage -> f.getMessage)
-                .withDetail(buildRequestDetails(requestHeader, requestBody).toSeq: _*))
+              dataEvent(EventTypes.RequestReceived, requestHeader.uri, requestHeader,
+                Map(FailedRequestMessage -> f.getMessage) ++ buildRequestDetails(requestHeader, requestBody)))
         }
       }
 

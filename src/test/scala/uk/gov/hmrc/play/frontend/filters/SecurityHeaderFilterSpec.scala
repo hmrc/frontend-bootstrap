@@ -18,11 +18,10 @@ package uk.gov.hmrc.play.frontend.filters
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import org.mockito.Matchers._
-import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.{Matchers, WordSpecLike}
+import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc._
 import play.api.mvc.Results._
@@ -30,18 +29,18 @@ import play.api.test.{FakeRequest, WithApplication}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
 
 class SecurityHeaderFilterSpec extends WordSpecLike with Matchers with MockitoSugar with ScalaFutures {
 
 
-  val appConfigDecodingEnabled = Map("security.headers.filter.decoding.enabled" -> true, "play.filters.headers.contentSecurityPolicy" -> "ZGVmYXVsdC1zcmMgJ3NlbGYn")
-  val appConfigDecodingDisabled = Map("security.headers.filter.decoding.enabled" -> false)
+  val appConfigDecodingEnabled: Map[String, _] = Map("security.headers.filter.decoding.enabled" -> true, "play.filters.headers.contentSecurityPolicy" -> "ZGVmYXVsdC1zcmMgJ3NlbGYn")
+  val appConfigDecodingDisabled: Map[String, _] = Map("security.headers.filter.decoding.enabled" -> false)
 
-  val appDecodingDisabled = new GuiceApplicationBuilder().configure(appConfigDecodingDisabled).build()
-  val appDecodingEnabled = new GuiceApplicationBuilder().configure(appConfigDecodingEnabled).build()
+  val appDecodingDisabled: Application = new GuiceApplicationBuilder().configure(appConfigDecodingDisabled).build()
+  val appDecodingEnabled: Application = new GuiceApplicationBuilder().configure(appConfigDecodingEnabled).build()
 
-  val auditConnector = mock[AuditConnector]
+  val auditConnector: AuditConnector = mock[AuditConnector]
 
   trait Setup {
 
@@ -60,11 +59,11 @@ class SecurityHeaderFilterSpec extends WordSpecLike with Matchers with MockitoSu
 
       val result = Await.result(futureResult, Duration.Inf)
 
-      result.header.headers contains ("Content-Security-Policy") shouldBe true
-      result.header.headers contains ("X-Content-Type-Options") shouldBe true
-      result.header.headers contains ("X-Frame-Options") shouldBe true
-      result.header.headers contains ("X-Permitted-Cross-Domain-Policies") shouldBe true
-      result.header.headers contains ("X-XSS-Protection") shouldBe true
+      result.header.headers contains "Content-Security-Policy" shouldBe true
+      result.header.headers contains "X-Content-Type-Options" shouldBe true
+      result.header.headers contains "X-Frame-Options" shouldBe true
+      result.header.headers contains "X-Permitted-Cross-Domain-Policies" shouldBe true
+      result.header.headers contains "X-XSS-Protection" shouldBe true
 
       result.header.headers("Content-Security-Policy") shouldBe SecurityHeadersFilterFactory.DEFAULT_CONTENT_SECURITY_POLICY
       result.header.headers("X-Content-Type-Options") shouldBe SecurityHeadersFilterFactory.DEFAULT_CONTENT_TYPE_OPTIONS
@@ -81,11 +80,11 @@ class SecurityHeaderFilterSpec extends WordSpecLike with Matchers with MockitoSu
 
       val result = Await.result(futureResult, Duration.Inf)
 
-      result.header.headers contains ("Content-Security-Policy") shouldBe true
-      result.header.headers contains ("X-Content-Type-Options") shouldBe true
-      result.header.headers contains ("X-Frame-Options") shouldBe true
-      result.header.headers contains ("X-Permitted-Cross-Domain-Policies") shouldBe true
-      result.header.headers contains ("X-XSS-Protection") shouldBe true
+      result.header.headers contains "Content-Security-Policy" shouldBe true
+      result.header.headers contains "X-Content-Type-Options" shouldBe true
+      result.header.headers contains "X-Frame-Options" shouldBe true
+      result.header.headers contains "X-Permitted-Cross-Domain-Policies" shouldBe true
+      result.header.headers contains "X-XSS-Protection" shouldBe true
 
       result.header.headers("Content-Security-Policy") shouldBe "default-src 'self'"
       result.header.headers("X-Content-Type-Options") shouldBe SecurityHeadersFilterFactory.DEFAULT_CONTENT_TYPE_OPTIONS

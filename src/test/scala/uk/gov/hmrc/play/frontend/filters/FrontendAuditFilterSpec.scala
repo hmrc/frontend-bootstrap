@@ -18,14 +18,17 @@ package uk.gov.hmrc.play.frontend.filters
 
 import akka.Done
 import akka.actor.ActorSystem
-import akka.stream.scaladsl.Source
 import akka.stream.{ActorMaterializer, Materializer}
+import akka.stream.scaladsl.Source
 import akka.util.ByteString
 import controllers.Assets
+import org.mockito.ArgumentCaptor
+import org.mockito.Matchers.any
+import org.mockito.Mockito._
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{Matchers, TestData, WordSpecLike}
+import org.scalatest.{BeforeAndAfterEach, Matchers, TestData, WordSpecLike}
 import org.scalatestplus.play._
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -33,34 +36,41 @@ import play.api.libs.ws.WS
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{FakeApplication, FakeRequest}
-import uk.gov.hmrc.http.{CookieNames, HeaderCarrier, HeaderNames}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.audit.{EventKeys, EventTypes}
-import uk.gov.hmrc.play.frontend.config.MockAuditConnector
+import uk.gov.hmrc.http.{CookieNames, HeaderCarrier, HeaderNames}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually with ScalaFutures with FilterFlowMock with MockitoSugar {
+
+class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually with ScalaFutures with FilterFlowMock with MockitoSugar with BeforeAndAfterEach {
+  import MockMethods._
+
   implicit val system = ActorSystem("test")
   implicit val materializer = ActorMaterializer()
 
-  def enumerateResponseBody(r: Result): Future[Done] = r.body.dataStream.runForeach({ i => })
+  def enumerateResponseBody(r: Result): Future[Done] = r.body.dataStream.runForeach({ _ => })
 
-  val filter = new FrontendAuditFilter {
+  implicit val filter = new FrontendAuditFilter {
+
     override val maskedFormFields: Seq[String] = Seq("password")
 
     override val applicationPort: Option[Int] = Some(80)
 
-    override val auditConnector = new MockAuditConnector
+    override val auditConnector: AuditConnector = mock[AuditConnector]
 
     override val appName: String = "app"
 
     override def controllerNeedsAuditing(controllerName: String): Boolean = false
 
-    implicit val sys: ActorSystem = system
+    implicit val system = ActorSystem("test")
+    implicit override def mat: Materializer = ActorMaterializer()
+  }
 
-    implicit override def mat: Materializer = materializer
+  override def beforeEach() {
+    reset(filter.auditConnector)
   }
 
   "A password" should {
@@ -95,7 +105,6 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
   "The Filter" should {
 
     "generate audit events without passwords" when {
-
       val body = "csrfToken=acb" +
         "&userId=113244018119" +
         "&password=123456789" +
@@ -116,13 +125,14 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
       }
 
       def expected() = eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.auditType shouldBe EventTypes.RequestReceived
         event.detail should contain("requestBody" -> "csrfToken=acb&userId=113244018119&password=#########&key1=")
       }(PatienceConfig(Span(5, Seconds), Span(200, Millis)))
     }
 
     "generate audit events with the device finger print when it is supplied in a request cookie" when {
+
       val encryptedFingerprint = "eyJ1c2VyQWdlbnQiOiJNb3ppbGxhLzUuMCAoTWFjaW50b3NoOyBJbnRlbCBNYWMgT1MgWCAxMF84XzUpIEFwcGxlV2ViS2l0LzUzNy4zNiAoS0hUTUwsIGx" +
         "pa2UgR2Vja28pIENocm9tZS8zMS4wLjE2NTAuNDggU2FmYXJpLzUzNy4zNiIsImxhbmd1YWdlIjoiZW4tVVMiLCJjb2xvckRlcHRoIjoyNCwicmVzb2x1dGlvbiI6IjgwMHgxMj" +
         "gwIiwidGltZXpvbmUiOjAsInNlc3Npb25TdG9yYWdlIjp0cnVlLCJsb2NhbFN0b3JhZ2UiOnRydWUsImluZGV4ZWREQiI6dHJ1ZSwicGxhdGZvcm0iOiJNYWNJbnRlbCIsImRvT" +
@@ -144,7 +154,7 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
       }
 
       def expected() = eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.auditType shouldBe EventTypes.RequestReceived
         event.detail should contain("deviceFingerprint" -> (
           """{"userAgent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.48 Safari/537.36",""" +
@@ -170,7 +180,7 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
       }
 
       def expected() = eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.auditType shouldBe EventTypes.RequestReceived
         event.detail should contain("deviceFingerprint" -> "-")
       }
@@ -190,7 +200,7 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
       }
 
       def expected() = eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.auditType shouldBe EventTypes.RequestReceived
         event.detail should contain("deviceFingerprint" -> "-")
       }
@@ -217,7 +227,7 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
       }
 
       def expected() = eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.auditType shouldBe EventTypes.RequestReceived
         event.detail should contain("Authorization" -> "Bearer fNAao9C4kTby8cqa6g75emw1DZIyA5B72nr9oKHHetE=")
         event.detail should contain("token" -> "aToken")
@@ -226,9 +236,9 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
     }
 
     "add the Location header to the details if available" in {
-      implicit val hc = new HeaderCarrier()
+      implicit val hc = HeaderCarrier()
 
-      val next = Action.async { r =>
+      val next = Action.async { _ =>
         Future.successful(Results.Ok.withHeaders("Location" -> "some url"))
       }
 
@@ -236,7 +246,7 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
       await(enumerateResponseBody(result))
 
       eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.detail should contain("Location" -> "some url")
       }
     }
@@ -259,7 +269,7 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
       }
 
       def expected() = eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.auditType shouldBe EventTypes.RequestReceived
         event.detail should contain("deviceID" -> deviceID)
       }
@@ -281,7 +291,7 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
       }
 
       def expected() = eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.auditType shouldBe EventTypes.RequestReceived
         event.detail should contain("deviceID" -> deviceID)
       }
@@ -354,34 +364,34 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
 
   "A frontend response" should {
     "not be included in the audit message if it is HTML" in {
-      implicit val hc = new HeaderCarrier()
+      implicit val hc = HeaderCarrier()
       val next = Action(Results.Ok(<h1>Hello, world!</h1>).as(HTML).withHeaders("Content-Type" -> "text/html"))
 
       val result = await(filter.apply(next)(FakeRequest()).run)
       await(enumerateResponseBody(result))
 
       eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.detail should contain("responseMessage" -> "<HTML>...</HTML>")
       }
     }
 
     "not depend on response headers when truncating HTML" in {
-      implicit val hc = new HeaderCarrier()
+      implicit val hc = HeaderCarrier()
       val next = Action(Results.Ok(<h1>Hello, world!</h1>).as(HTML))
 
       val result = await(filter.apply(next)(FakeRequest()).run)
       await(enumerateResponseBody(result))
 
       eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.detail should contain("responseMessage" -> "<HTML>...</HTML>")
       }
     }
 
     "not be included in the audit message if it is html with utf-8" in {
-      implicit val hc = new HeaderCarrier()
-      val next = Action.async { r =>
+      implicit val hc = HeaderCarrier()
+      val next = Action.async { _ =>
         Future.successful(Results.Ok(<h1>Hello, world!</h1>).as(HTML).withHeaders("Content-Type" -> "text/html; charset=utf-8"))
       }
 
@@ -389,23 +399,23 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
       await(enumerateResponseBody(result))
 
       eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.detail should contain("responseMessage" -> "<HTML>...</HTML>")
       }
     }
 
 
     "be included if the ContentType is not text/html" in {
-      implicit val hc = new HeaderCarrier()
+      implicit val hc = HeaderCarrier()
       val next = Action.async {
-        r => Future.successful(Results.Status(303)("....the response...").withHeaders("Content-Type" -> "application/json"))
+        _ => Future.successful(Results.Status(303)("....the response...").withHeaders("Content-Type" -> "application/json"))
       }
 
       val result = await(filter.apply(next)(FakeRequest()).run)
       await(enumerateResponseBody(result))
 
       eventually {
-        val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
+        val event = verifyAndRetrieveEvent
         event.detail should contain("responseMessage" -> "....the response...")
       }
     }
@@ -413,22 +423,26 @@ class FrontendAuditFilterSpec extends WordSpecLike with Matchers with Eventually
 }
 
 class FrontendAuditFilterServerSpec extends FrontendAuditFilterSpec with OneServerPerTest {
+  import MockMethods._
 
   val random = new scala.util.Random
-  val rs = randomString("abcdefghijklmnopqrstuvwxyz0123456789")(filter.maxBodySize * 3)
+  val largeContent: String = randomString("abcdefghijklmnopqrstuvwxyz0123456789")(filter.maxBodySize * 3)
+  val standardContent: String = randomString("abcdefghijklmnopqrstuvwxyz0123456789")(filter.maxBodySize - 1)
+
   val pc = PatienceConfig(Span(5, Seconds), Span(15, Millis))
 
   // Generate a random string of length n from the given alphabet
   def randomString(alphabet: String)(n: Int): String =
-  Stream.continually(random.nextInt(alphabet.size)).map(alphabet).take(n).mkString
+    Stream.continually(random.nextInt(alphabet.length)).map(alphabet).take(n).mkString
 
-  val assets = new GuiceApplicationBuilder().injector().instanceOf[Assets]
+  val assets: Assets = new GuiceApplicationBuilder().injector().instanceOf[Assets]
 
   override def newAppForTest(testData: TestData): Application = new GuiceApplicationBuilder().routes({
-    case ("GET", "/assets/stylesheet.css") => filter.apply(assets.at("/", "stylesheet.css"))
-    case ("GET", "/assets/stylesheetLarge.css") => filter.apply(assets.at("/", "stylesheetLarge.css"))
+    case ("GET", "/standardresponse") => filter.apply(Action {
+      Results.Ok(standardContent)
+    })
     case ("GET", "/longresponse") => filter.apply(Action {
-      Results.Ok(rs)
+      Results.Ok(largeContent)
     })
     case ("POST", "/longrequest") => filter.apply(Action {
       Results.Ok
@@ -436,58 +450,52 @@ class FrontendAuditFilterServerSpec extends FrontendAuditFilterSpec with OneServ
   }).build()
 
   "Attempting to audit a large in-memory response" in {
-    filter.auditConnector.reset
+    reset(filter.auditConnector)
 
     val url = s"http://localhost:$port/longresponse"
     val response = await(WS.url(url).get())
 
     eventually {
-      val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
-      response.body.length should equal(rs.length)
-      event.detail should not be null
-      event.detail.get(EventKeys.ResponseMessage).getOrElse("").length should equal(filter.maxBodySize)
+      response.body.length should equal(largeContent.length)
+      verifyDetailPropertyLength(EventKeys.ResponseMessage, filter.maxBodySize)
     }
   }
 
-  "Attempting to audit assets" in {
-    filter.auditConnector.reset
+  "Attempting to audit a standard in-memory response" in {
+    reset(filter.auditConnector)
 
-    val url = s"http://localhost:$port/assets/stylesheet.css"
+    val url = s"http://localhost:$port/standardresponse"
     val response = await(WS.url(url).get())
 
     eventually {
-      response.body.length should equal(10278)
-      val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
-      event.detail should not be null
-      event.detail.get(EventKeys.ResponseMessage).getOrElse("").length should equal(10278)
-    }
-  }
-
-  "Attempting to audit truncated large assets" in {
-    filter.auditConnector.reset
-
-    val url = s"http://localhost:$port/assets/stylesheetLarge.css"
-    val response = await(WS.url(url).get())
-
-    eventually {
-      response.body.length should equal(45423)
-      val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
-      event.detail should not be null
-      event.detail.get(EventKeys.ResponseMessage).getOrElse("").length should equal(filter.maxBodySize)
+      response.body.length should equal(standardContent.length)
+      verifyDetailPropertyLength(EventKeys.ResponseMessage, standardContent.length)
     }
   }
 
   "Attempting to audit a large request" in {
-    filter.auditConnector.reset
+    reset(filter.auditConnector)
 
     val url = s"http://localhost:$port/longrequest"
-    val response = await(WS.url(url).post(rs))
+    val response = await(WS.url(url).post(largeContent))
 
     eventually {
-      val event = filter.auditConnector.recordedEvent.get.asInstanceOf[DataEvent]
-      event.detail should not be null
-      event.detail.get(EventKeys.RequestBody).getOrElse("").length should equal(filter.maxBodySize)
-    }(pc)
+      response.body.length should equal(0)
+      verifyDetailPropertyLength(EventKeys.RequestBody, filter.maxBodySize)
+    }
   }
 
+  def verifyDetailPropertyLength(detailKey: String, length: Int): Unit = {
+    val event = verifyAndRetrieveEvent
+    event.detail should not be null
+    event.detail.getOrElse(detailKey, "").length should equal(length)
+  }
+}
+
+object MockMethods {
+  def verifyAndRetrieveEvent(implicit filter: FrontendAuditFilter): DataEvent = {
+    val captor = ArgumentCaptor.forClass(classOf[DataEvent])
+    verify(filter.auditConnector).sendEvent(captor.capture)(any[HeaderCarrier], any[ExecutionContext])
+    captor.getValue
+  }
 }
