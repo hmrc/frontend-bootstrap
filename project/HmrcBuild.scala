@@ -46,7 +46,7 @@ object Dependencies {
     "uk.gov.hmrc" %% "govuk-template" % "5.3.0",
     "uk.gov.hmrc" %% "play-config" % "4.3.0",
     "uk.gov.hmrc" %% "play-health" % "2.1.0",
-    "uk.gov.hmrc" %% "play-ui" % "7.4.0",
+    "uk.gov.hmrc" %% "play-ui" % "7.7.0",
     "com.typesafe.play" %% "play" % PlayVersion.current,
     "de.threedimensions" %% "metrics-play" % "2.5.13"
   )
