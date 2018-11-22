@@ -15,7 +15,6 @@ object LibDependencies {
     "uk.gov.hmrc"                    %% "crypto"                   % "4.4.0",
     "uk.gov.hmrc"                    %% "play-auditing"            % "3.14.0-play-25-SNAPSHOT",
     "uk.gov.hmrc"                    %% "http-verbs"               % "8.10.0-play-25-SNAPSHOT",
-    "uk.gov.hmrc"                    %% "http-verbs-play-25"       % "0.12.0-2-g0fa34fb",
     "uk.gov.hmrc"                    %% "play-graphite"            % "4.4.0-SNAPSHOT",
     "uk.gov.hmrc"                    %% "play-authorised-frontend" % "7.0.0-7-g0219a51",
     "ch.qos.logback"                 % "logback-classic"           % "1.2.3",
