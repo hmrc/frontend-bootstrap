@@ -20,7 +20,7 @@ object LibDependencies {
     "ch.qos.logback"                 % "logback-classic"           % "1.2.3",
     "uk.gov.hmrc"                    %% "logback-json-logger"      % "3.1.0",
     "uk.gov.hmrc"                    %% "govuk-template"           % "5.3.0",
-    "uk.gov.hmrc"                    %% "play-config"              % "7.0.0-0-g0000000",
+    "uk.gov.hmrc"                    %% "play-config"              % "7.0.0-1-gbc31795",
     "uk.gov.hmrc"                    %% "play-health"              % "2.1.0",
     "uk.gov.hmrc"                    %% "play-ui"                  % "7.21.0",
     "com.typesafe.play"              %% "play"                     % PlayVersion.current,
