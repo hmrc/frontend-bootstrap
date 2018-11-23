@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.play.frontend.filters
 
-import com.ning.http.util.Base64
+import org.asynchttpclient.util.Base64
 import play.api.Logger
 import play.api.mvc.RequestHeader
-
 import scala.util.Try
 
 object DeviceFingerprint {
