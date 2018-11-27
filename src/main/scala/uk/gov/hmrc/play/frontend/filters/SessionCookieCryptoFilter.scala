@@ -20,7 +20,9 @@ import javax.inject.Inject
 import play.api.{Configuration, Logger, Play}
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Crypted, PlainText}
 
-class SessionCookieCryptoFilter(applicationCrypto: ApplicationCrypto) extends CookieCryptoFilter with MicroserviceFilterSupport {
+class SessionCookieCryptoFilter(applicationCrypto: ApplicationCrypto)
+    extends CookieCryptoFilter
+    with MicroserviceFilterSupport {
 
   // Lazy because the filter is instantiated before the config is loaded
   private lazy val crypto = applicationCrypto.SessionCookieCrypto

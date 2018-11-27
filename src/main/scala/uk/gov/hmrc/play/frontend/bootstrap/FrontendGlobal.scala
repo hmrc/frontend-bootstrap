@@ -137,6 +137,6 @@ abstract class DefaultFrontendGlobal
     new CSRFExceptionsFilter(uriWhiteList)
   }
 
-  lazy val applicationCrypto = new ApplicationCrypto(configuration.underlying)
+  lazy val applicationCrypto                                        = new ApplicationCrypto(configuration.underlying)
   override def sessionCookieCryptoFilter: SessionCookieCryptoFilter = new SessionCookieCryptoFilter(applicationCrypto)
 }

@@ -51,15 +51,15 @@ class SessionCookieCryptoFilterSpec extends WordSpecLike with Matchers with Mock
   "SessionCookieCryptoFilter" should {
     "decrypt the session cookie on the way in and encrypt it again on the way back" in new WithApplication(
       FakeApplication(additionalConfiguration = appConfig)) {
-      val applicationCrypto = new ApplicationCrypto(app.configuration.underlying)
-      val sessionCookieCrypto = applicationCrypto.SessionCookieCrypto
+      val applicationCrypto         = new ApplicationCrypto(app.configuration.underlying)
+      val sessionCookieCrypto       = applicationCrypto.SessionCookieCrypto
       val sessionCookieCryptoFilter = new SessionCookieCryptoFilter(applicationCrypto)
       def createEncryptedCookie(cookieVal: String) =
         Cookie(Session.COOKIE_NAME, sessionCookieCrypto.encrypt(PlainText(cookieVal)).value)
       val encryptedIncomingCookie   = createEncryptedCookie("our-cookie")
       val unencryptedIncomingCookie = Cookie(Session.COOKIE_NAME, "our-cookie")
-      val incomingRequest = FakeRequest().withCookies(encryptedIncomingCookie)
-      val response        = sessionCookieCryptoFilter(action)(incomingRequest).futureValue
+      val incomingRequest           = FakeRequest().withCookies(encryptedIncomingCookie)
+      val response                  = sessionCookieCryptoFilter(action)(incomingRequest).futureValue
 
       requestPassedToAction.cookies(Session.COOKIE_NAME) shouldBe unencryptedIncomingCookie
 
