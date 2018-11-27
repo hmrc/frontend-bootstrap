@@ -16,12 +16,14 @@
 
 package uk.gov.hmrc.play.frontend.filters
 
+import javax.inject.Inject
+import play.api.{Configuration, Logger, Play}
 import uk.gov.hmrc.crypto.{ApplicationCrypto, Crypted, PlainText}
 
-object SessionCookieCryptoFilter extends CookieCryptoFilter with MicroserviceFilterSupport {
+class SessionCookieCryptoFilter(applicationCrypto: ApplicationCrypto) extends CookieCryptoFilter with MicroserviceFilterSupport {
 
   // Lazy because the filter is instantiated before the config is loaded
-  private lazy val crypto = ApplicationCrypto.SessionCookieCrypto
+  private lazy val crypto = applicationCrypto.SessionCookieCrypto
 
   override protected val encrypter = encrypt _
   override protected val decrypter = decrypt _
@@ -29,5 +31,4 @@ object SessionCookieCryptoFilter extends CookieCryptoFilter with MicroserviceFil
   def encrypt(plainCookie: String): String = crypto.encrypt(PlainText(plainCookie)).value
 
   def decrypt(encryptedCookie: String): String = crypto.decrypt(Crypted(encryptedCookie)).value
-
 }

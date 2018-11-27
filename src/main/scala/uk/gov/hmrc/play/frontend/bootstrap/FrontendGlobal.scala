@@ -17,16 +17,18 @@
 package uk.gov.hmrc.play.frontend.bootstrap
 
 import com.kenshoo.play.metrics.MetricsFilter
-import org.joda.time.{Duration}
+import org.joda.time.Duration
 import org.slf4j.MDC
 import play.api._
 import play.api.mvc._
 import play.filters.csrf.CSRFFilter
 import play.filters.headers.SecurityHeadersFilter
+import uk.gov.hmrc.crypto.ApplicationCrypto
 import uk.gov.hmrc.play.frontend.config.ErrorAuditingSettings
 import uk.gov.hmrc.play.frontend.bootstrap.Routing.RemovingOfTrailingSlashes
 import uk.gov.hmrc.play.frontend.filters._
 import uk.gov.hmrc.play.graphite.GraphiteConfig
+import uk.gov.hmrc.play.frontend.filters.SessionCookieCryptoFilter
 
 trait FrontendFilters {
 
@@ -46,11 +48,13 @@ trait FrontendFilters {
 
   def csrfExceptionsFilter: CSRFExceptionsFilter
 
+  def sessionCookieCryptoFilter: SessionCookieCryptoFilter
+
   protected def defaultFrontendFilters: Seq[EssentialFilter] =
     Seq(
       metricsFilter,
       HeadersFilter,
-      SessionCookieCryptoFilter,
+      sessionCookieCryptoFilter,
       deviceIdFilter,
       loggingFilter,
       frontendAuditFilter,
@@ -133,4 +137,6 @@ abstract class DefaultFrontendGlobal
     new CSRFExceptionsFilter(uriWhiteList)
   }
 
+  lazy val applicationCrypto = new ApplicationCrypto(configuration.underlying)
+  override def sessionCookieCryptoFilter: SessionCookieCryptoFilter = new SessionCookieCryptoFilter(applicationCrypto)
 }
