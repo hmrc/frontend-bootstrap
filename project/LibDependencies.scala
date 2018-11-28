@@ -16,7 +16,7 @@ object LibDependencies {
     "uk.gov.hmrc"                    %% "play-auditing"            % "3.14.0-play-25-SNAPSHOT",
     "uk.gov.hmrc"                    %% "http-verbs"               % "8.10.0-play-25-SNAPSHOT",
     "uk.gov.hmrc"                    %% "play-graphite"            % "4.4.0-SNAPSHOT",
-    "uk.gov.hmrc"                    %% "play-authorised-frontend" % "7.0.0-8-g3f3a212",
+    "uk.gov.hmrc"                    %% "play-authorised-frontend" % "7.0.0-9-g267adc9",
     "ch.qos.logback"                 % "logback-classic"           % "1.2.3",
     "uk.gov.hmrc"                    %% "logback-json-logger"      % "3.1.0",
     "uk.gov.hmrc"                    %% "govuk-template"           % "5.26.0-play-25-SNAPSHOT",
@@ -35,10 +35,9 @@ object LibDependencies {
   val test = Seq(
     "com.typesafe.play"      %% "play-test"          % PlayVersion.current % "test",
     "com.typesafe.play"      %% "play-specs2"        % PlayVersion.current % "test",
-    "org.scalatest"          %% "scalatest"          % "2.2.4"             % "test",
     "org.pegdown"            % "pegdown"             % "1.5.0"             % "test",
     "org.mockito"            % "mockito-all"         % "1.9.5"             % "test",
-    "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1"             % "test"
+    "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1"             % "test"
   )
 
 }
