@@ -38,7 +38,7 @@ object LibDependencies {
     "org.scalatest"          %% "scalatest"          % "2.2.4"             % "test",
     "org.pegdown"            % "pegdown"             % "1.5.0"             % "test",
     "org.mockito"            % "mockito-all"         % "1.9.5"             % "test",
-    "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1"             % "test"
+    "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1"             % "test"
   )
 
 }
